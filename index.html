@@ -1,233 +1,209 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>成交雷達</title>
+<title>成交雷達 Sales Closing Radar</title>
 
 <style>
 body {
-  font-family: -apple-system, BlinkMacSystemFont;
-  margin: 0;
-  background: linear-gradient(180deg, #0f172a, #1e293b);
-  color: #e2e8f0;
-  text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI";
+    background: #f5f6f8;
+    margin: 0;
+    padding: 20px;
 }
 
-h2 {
-  margin-top: 20px;
-  font-weight: 700;
-  color: #fbbf24;
-  letter-spacing: 2px;
+.container {
+    max-width: 480px;
+    margin: auto;
 }
 
-/* 按鈕 */
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.subtitle {
+    color: #666;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.question {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
 button {
-  width: 90%;
-  padding: 16px;
-  margin: 10px;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: black;
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    background: #eee;
 }
 
-/* 卡片 */
-.result-card {
-  border-radius: 22px;
-  padding: 25px;
-  margin: 20px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+button.active {
+    background: #1F7A63;
+    color: white;
 }
 
-/* 分數 */
-.score-big {
-  font-size: 48px;
-  font-weight: bold;
+.next {
+    background: black;
+    color: white;
 }
 
-/* 建議 */
-.advice-text {
-  font-size: 18px;
-  margin-top: 10px;
+.result {
+    text-align: center;
 }
 
-/* 籤 */
-.top-tag {
-  font-size: 14px;
-  margin-bottom: 10px;
+.percent {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 10px 0;
 }
 
-/* 解鎖 */
-.lock-box {
-  margin-top: 15px;
-  padding: 15px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.3);
+.high { background: #1F7A63; color: white; }
+.mid { background: #C9A96E; color: white; }
+.low { background: #8B2E2E; color: white; }
+
+.advice {
+    margin-top: 15px;
+    font-size: 15px;
+    line-height: 1.6;
 }
 
-/* 顏色 */
-.result-good {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
-  color: white;
-}
-
-.result-mid {
-  background: linear-gradient(135deg, #facc15, #fbbf24);
-  color: black;
-}
-
-.result-bad {
-  background: linear-gradient(135deg, #dc2626, #ef4444);
-  color: white;
+.footer {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 20px;
 }
 </style>
-
 </head>
 
 <body>
 
-<h2>成交雷達</h2>
+<div class="container">
 
-<div id="step1">
-<p>客戶狀態？</p>
-<button onclick="selectClient('熱')">很有興趣</button>
-<button onclick="selectClient('普通')">普通</button>
-<button onclick="selectClient('冷')">冷</button>
+<!-- 首頁 -->
+<div id="start" class="card">
+    <div class="title">成交機率分析工具</div>
+    <div class="subtitle">Sales Closing Radar</div>
+    <div class="subtitle">用結構化問題，快速判斷這單該追還是該放</div>
+
+    <button onclick="startTest()">開始分析</button>
 </div>
 
-<div id="step2" style="display:none;">
-<p>目前進度？</p>
-<button onclick="calc('成交')">準備成交</button>
-<button onclick="calc('議價')">談價中</button>
-<button onclick="calc('初談')">剛開始</button>
-<button onclick="goBack1()">← 返回</button>
+<!-- 問題 -->
+<div id="quiz" class="card" style="display:none;">
+    <div class="question" id="questionText"></div>
+    <div id="options"></div>
+    <button class="next" onclick="nextQuestion()">下一題</button>
 </div>
 
-<div id="result" style="display:none;">
-
-  <div id="resultBox" class="result-card">
-
-    <div class="top-tag">AI 判斷結果</div>
-
-    <div id="score" class="score-big"></div>
-
-    <div id="advice" class="advice-text"></div>
-
-    <div id="lock" class="lock-box">
-🔒 完整成交策略 NT$49<br><br>
-💰 這一步，可能就是成交關鍵
-    </div>
-
-    <button onclick="unlock()">🔓 解鎖完整分析</button>
-    <button onclick="printReport()">📄 列印 / 收藏</button>
-    <button onclick="resetAll()">重新開始</button>
-
-  </div>
+<!-- 結果 -->
+<div id="result" class="card result" style="display:none;">
+    <div class="title">分析結果</div>
+    <div class="percent" id="percent"></div>
+    <div id="level"></div>
+    <div class="advice" id="advice"></div>
+    <div class="footer">※ 本分析依據客戶行為與成交模型推估</div>
+</div>
 
 </div>
 
 <script>
+const questions = [
+    { q: "客戶是否已看過3間以上物件？", score: 20 },
+    { q: "是否明確表達購買意願？", score: 25 },
+    { q: "是否已談到價格或條件？", score: 20 },
+    { q: "是否有明確購買時間？", score: 20 },
+    { q: "是否有決策權或關鍵影響力？", score: 15 }
+];
 
-let client="";
+let current = 0;
+let totalScore = 0;
 
-function selectClient(c){
-  client=c;
-  document.getElementById("step1").style.display="none";
-  document.getElementById("step2").style.display="block";
+function startTest() {
+    document.getElementById("start").style.display = "none";
+    document.getElementById("quiz").style.display = "block";
+    loadQuestion();
 }
 
-function goBack1(){
-  document.getElementById("step2").style.display="none";
-  document.getElementById("step1").style.display="block";
+function loadQuestion() {
+    document.getElementById("questionText").innerText = questions[current].q;
+    let options = document.getElementById("options");
+    options.innerHTML = "";
+
+    ["是", "不確定", "否"].forEach((text, index) => {
+        let btn = document.createElement("button");
+        btn.innerText = text;
+        btn.onclick = () => selectOption(index, btn);
+        options.appendChild(btn);
+    });
 }
 
-function resetAll(){
-  document.getElementById("result").style.display="none";
-  document.getElementById("step1").style.display="block";
+let selected = null;
+
+function selectOption(index, btn) {
+    selected = index;
+    document.querySelectorAll("#options button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 }
 
-function calc(stage){
+function nextQuestion() {
+    if (selected === null) {
+        alert("請選擇答案");
+        return;
+    }
 
-  let score=50;
+    let scoreMap = [1, 0.5, 0];
+    totalScore += questions[current].score * scoreMap[selected];
 
-  if(client==="熱") score+=20;
-  if(client==="冷") score-=20;
+    current++;
+    selected = null;
 
-  if(stage==="成交") score+=15;
-  if(stage==="初談") score-=10;
-
-  score=Math.max(0,Math.min(100,score));
-
-  let advice="";
-  let tag = document.querySelector(".top-tag");
-  let box = document.getElementById("resultBox");
-
-  box.className = "result-card";
-
-  if(score >= 70){
-    advice="🟢 可推進（時機不錯）";
-    tag.innerText = "🟢 上上籤";
-    box.classList.add("result-good");
-
-  }else if(score >= 40){
-    advice="⚠️ 建議觀察（先不要急）";
-    tag.innerText = "🟡 中籤";
-    box.classList.add("result-mid");
-
-  }else{
-    advice="🔴 風險偏高（暫停推進）";
-    tag.innerText = "🔴 下籤";
-    box.classList.add("result-bad");
-  }
-
-  document.getElementById("score").innerText="成交機率："+score+"%";
-  document.getElementById("advice").innerText=advice;
-
-  document.getElementById("step2").style.display="none";
-  document.getElementById("result").style.display="block";
+    if (current < questions.length) {
+        loadQuestion();
+    } else {
+        showResult();
+    }
 }
 
-function unlock(){
+function showResult() {
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("result").style.display = "block";
 
-  let confirmPay = confirm("這功能之後會收費 NT$49\n你會願意付嗎？");
+    let percent = Math.round(totalScore);
+    document.getElementById("percent").innerText = percent + "%";
 
-  if(confirmPay){
-    alert("🙏 測試中，先免費開放");
+    let level = document.getElementById("level");
+    let advice = document.getElementById("advice");
+    let resultCard = document.getElementById("result");
 
-    document.getElementById("lock").innerHTML =
-    "✅ 話術：先確認需求再談價格<br><br>" +
-    "⏰ 時機：下午3-5點<br><br>" +
-    "🧠 心理：對方接近決策點";
-
-  }else{
-    document.getElementById("lock").innerHTML =
-    "👉 建議：目前可推進，但避免談價格";
-  }
+    if (percent >= 70) {
+        resultCard.classList.add("high");
+        level.innerText = "高度成交機會｜建議積極推進";
+        advice.innerText = "客戶具備明確購買訊號，建議加快成交節奏，避免流失。";
+    } else if (percent >= 40) {
+        resultCard.classList.add("mid");
+        level.innerText = "尚未明確｜建議持續觀察";
+        advice.innerText = "客戶仍在評估階段，需加強信任與需求確認。";
+    } else {
+        resultCard.classList.add("low");
+        level.innerText = "成交可能性低｜建議暫停投入";
+        advice.innerText = "缺乏關鍵成交訊號，建議降低優先順序。";
+    }
 }
-
-function printReport(){
-
-  const score = document.getElementById("score").innerText;
-  const advice = document.getElementById("advice").innerText;
-
-  const now = new Date();
-  const time = now.toLocaleString();
-
-  const html = `
-  <h1>成交決策報告</h1>
-  <p>${score}</p>
-  <p>${advice}</p>
-  <p>時間：${time}</p>
-  `;
-
-  const w = window.open("");
-  w.document.write(html);
-  w.print();
-}
-
 </script>
 
 </body>
